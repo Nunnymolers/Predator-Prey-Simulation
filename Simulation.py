@@ -1,4 +1,7 @@
-from tkinter import *
+try :
+   from tkinter import *
+except :
+   from Tkinter import *
 from random import randint
 from time import sleep, time
 HEIGHT = 1080
