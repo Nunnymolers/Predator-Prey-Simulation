@@ -8,8 +8,8 @@ from random import randint
 from time import sleep, time
 
 #CONSTANTS
-HEIGHT = 1080
-WIDTH = 1920
+HEIGHT = 1000
+WIDTH = 1000
 r = 5
 MIN_DISTANCE = 5
 MAX_DISTANCE = 60
@@ -26,7 +26,7 @@ starvation_predator = 5000
 predator_lifespan = 7000
 prey_lifespan = 4500
 #number of prey and predator
-num_predator = 100
+num_predator = 10
 min_prey_direction_change = 2
 max_prey_direction_change = 20
 max_predator_direction_change = 23
@@ -86,6 +86,46 @@ def walk(animal_motion,step,animal_list, min, max):
 def difference(start_ratio, num_predator, num_prey):
    return start_ratio - num_predator/num_prey
 
+def collisionpp():
+    points = 0
+    for bub in range(len(bub_id)-1, -1, -1):
+        if distance(ship_id2, bub_id[bub]) < (SHIP_R + bub_r[bub]):
+            points += (bub_r[bub] + bub_speed[bub])
+            del_bubble(bub)
+    return points
+
+def del_prey(i):
+   c.delete(prey_list[i])
+   del prey_list[i]
+
+   
+def del_bubble(i):
+    del bub_r[i]
+    del bub_speed[i]
+    c.delete(bub_id[i])
+    del bub_id[i]
+
+from math import sqrt
+
+def get_coords(id_num):
+    pos = c.coords(id_num)
+    x =  (pos[0] + pos[2])/2
+    y =  (pos[1] + pos[3])/2
+    return x, y
+
+def distance(id1, id2):
+    x1, y1 = get_coords(id1)
+    x2, y2 = get_coords(id2)
+    return sqrt((x2 - x1)**2 + (y2 - y1)**2)
+            
+def collision():
+    for prey_oval_i in range(len(prey_list)-1, -1, -1):
+       for predator_oval_i in range(len(predator_list)-1, -1, -1):
+          if distance(prey_list[prey_oval_i], predator_list[predator_oval_i]) < r + r:
+             del_prey(i) 
+    return
+
+
 #ENTRY POINT
 window.title('Predator Prey Simulation')
 c.pack()
@@ -98,7 +138,7 @@ for i in range(num_prey):
     create_prey()
 
 for i in range(num_predator):
-    create_predator() 
+    create_predator()
 
 while True:
     walk(prey_motion, step, prey_list,min_prey_direction_change, max_prey_direction_change)
@@ -106,3 +146,4 @@ while True:
     window.update()
     sleep(0.01)
     step += 1
+    collision()
