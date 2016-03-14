@@ -8,12 +8,11 @@ from random import randint
 from time import sleep, time
 
 #CONSTANTS
-HEIGHT = 1000
-WIDTH = 1000
+HEIGHT = 400
+WIDTH = 800
 r = 5
 MIN_DISTANCE = 5
 MAX_DISTANCE = 60
-
 #CONTROL VARIABLES
 #starting ratio of predator and prey
 start_ratio = 0.5
@@ -75,6 +74,8 @@ def create_prey():
     prey_list.append(prey)
     return prey
 
+
+
 def walk(animal_motion,step,animal_list, min, max):
    for i in range(len(animal_list)):
       if step % animal_motion['direction_count'][i] == 0:
@@ -82,6 +83,7 @@ def walk(animal_motion,step,animal_list, min, max):
          animal_motion['y'][i] = randint(-3,3)
          animal_motion['direction_count'][i] = randint(min,max)
       c.move(animal_list[i], animal_motion['x'][i], animal_motion['y'][i])
+      handle_boundary(animal_list[i])
 
 def difference(start_ratio, num_predator, num_prey):
    return start_ratio - num_predator/num_prey
@@ -95,10 +97,23 @@ def collisionpp():
     return points
 
 def del_prey(i):
-   c.delete(prey_list[i])
-   del prey_list[i]
+   try:
+      c.delete(prey_list[i])
+      del prey_list[i]
+   except:
+      pass
 
-   
+def handle_boundary(animal):
+   x,y = get_coords(animal)
+   if x <= 0:
+      c.move(animal,WIDTH, 0)
+   elif x >= WIDTH:
+      c.move(animal,-WIDTH, 0)
+   if y <= 0:
+      c.move(animal,0, HEIGHT)
+   elif y >= WIDTH:
+      c.move(animal,0, -HEIGHT)
+      
 def del_bubble(i):
     del bub_r[i]
     del bub_speed[i]
@@ -121,8 +136,12 @@ def distance(id1, id2):
 def collision():
     for prey_oval_i in range(len(prey_list)-1, -1, -1):
        for predator_oval_i in range(len(predator_list)-1, -1, -1):
-          if distance(prey_list[prey_oval_i], predator_list[predator_oval_i]) < r + r:
-             del_prey(i) 
+         try:
+             if distance(prey_list[prey_oval_i], predator_list[predator_oval_i]) < r + r:
+                  del_prey(prey_oval_i)
+             
+         except:
+            pass
     return
 
 
