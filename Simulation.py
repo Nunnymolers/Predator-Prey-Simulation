@@ -1,3 +1,10 @@
+"""
+TO DO:
+   1)Lifespans
+   2)Ratio count
+   3)Equilibrium
+   4)Humans
+"""
 
 #IMPORT YOUR LIBRARIES
 try :
@@ -13,7 +20,7 @@ from math import sqrt
 #CONSTANTS
 HEIGHT = 400
 WIDTH = 800
-r = 5
+r = 8
 MIN_DISTANCE = 5
 MAX_DISTANCE = 60
 #CONTROL VARIABLES
@@ -25,11 +32,11 @@ repro_chance_prey = 70
 repro_chance_predator = 45
 #time
 starvation_predator = 5000
-predator_lifespan = 7000
-prey_lifespan = 4500
+predator_lifespan = 6200
+prey_lifespan = 5600
 #number of prey and predator
-num_predator = 3
-num_prey = int(num_predator/start_ratio)
+num_predator = 5
+num_prey = int(num_predator/start_ratio - 1)
 speed = {
    'prey': 3,
    'predator': 3
@@ -41,8 +48,18 @@ color = {
 }
 
 spawn = {
+   'prey': 7,
+   'predator': 6
+}
+
+lifespan = {
+   'prey': 900,
+   'predator': 900
+}
+
+chance_of_death = {
    'prey': 1,
-   'predator': 2
+   'predator': 1
 }
 
 #DEPENDENT VARIABLE
@@ -84,25 +101,39 @@ def create_animal(animal_type):
        'name': str(uuid.uuid4()),
        'x': randint(-speed[animal_type],speed[animal_type]),
        'y': randint(-speed[animal_type],speed[animal_type]),
-       'direction_count':randint(animal_motion[animal_type]['change']['min'],animal_motion[animal_type]['change']['max'])      
+       'direction_count':randint(animal_motion[animal_type]['change']['min'],animal_motion[animal_type]['change']['max']),
+       'age_count': 0,
+       'hunger': 0
     })
     return animal
 
 def walk(animal_motion,step,animal_list):
+   animal_count = {
+      'prey': 0,
+      'predator': 0
+   }
    for i in range(len(animal_list)):
-      animal = animal_list[i]
-      animal_type = animal['type']
-      if step % animal['direction_count'] == 0:
-         animal['x'] = randint(-speed[animal_type],speed[animal_type])
-         animal['y'] = randint(-speed[animal_type],speed[animal_type])
-         animal['direction_count'] = randint(animal_motion[animal_type]['change']['min'],animal_motion[animal_type]['change']['max'])
-      c.move(animal['oval'], animal['x'], animal['y'])
-      handle_boundary(animal['oval'])
+      try:
+         animal = animal_list[i]
+         animal_type = animal['type']
+         animal_count[animal_type] += 1
+         animal['age_count'] += 1
+         animal['hunger'] += 1
+         if step % animal['direction_count'] == 0:
+            animal['x'] = randint(-speed[animal_type],speed[animal_type])
+            animal['y'] = randint(-speed[animal_type],speed[animal_type])
+            animal['direction_count'] = randint(animal_motion[animal_type]['change']['min'],animal_motion[animal_type]['change']['max'])
+         c.move(animal['oval'], animal['x'], animal['y'])
+         handle_boundary(animal['oval'])
+         handle_death(animal)
+      except:
+            pass
+   print(','.join([str(step)] + [str(v) for v in animal_count.values()]))
 
 def difference(start_ratio, num_predator, num_prey):
    return start_ratio - num_predator/num_prey
 
-def del_prey(animal):
+def del_animal(animal):
    try:
       c.delete(animal['oval'])
       animal_list.remove(animal)
@@ -113,14 +144,19 @@ def del_prey(animal):
 
 def handle_boundary(animal):
    x,y = get_coords(animal)
-   if x <= 0:
-      c.move(animal,WIDTH, 0)
-   elif x >= WIDTH:
-      c.move(animal,-WIDTH, 0)
-   if y <= 0:
-      c.move(animal,0, HEIGHT)
-   elif y >= WIDTH:
-      c.move(animal,0, -HEIGHT)
+   buffer = 10 
+   if x <= buffer:
+      c.move(animal,WIDTH - buffer, 0)
+   elif x >= WIDTH - buffer:
+      c.move(animal,buffer - WIDTH, 0)
+   if y <= buffer:
+      c.move(animal,0, HEIGHT - buffer)
+   elif y >= HEIGHT - buffer:
+      c.move(animal,0, buffer - HEIGHT)
+
+def handle_death(animal):
+   if lifespan[animal['type']] < animal['age_count'] and randint(1,1000) <= chance_of_death[animal['type']]:
+      del_animal(animal)
 
 def get_coords(id_num):
     pos = c.coords(id_num)
@@ -141,7 +177,7 @@ def collision():
           try:
                 if distance(animal_i['oval'], animal_j['oval']) < 2*r:
                    if animal_i['type']== 'predator' and animal_j['type']== 'prey':
-                      del_prey(animal_j)
+                      del_animal(animal_j)
                    elif animal_i['type']== 'prey' and animal_j['type']== 'prey' and randint(1,100) <= spawn['prey']:
                       create_animal('prey')
                    if animal_i['type']== 'predator' and animal_j['type']== 'predator' and randint(1,100) <= spawn['predator']:
@@ -155,10 +191,6 @@ def collision():
 #ENTRY POINT
 window.title('Predator Prey Simulation')
 c.pack()
-c.create_text(50, 30, text='# of Predators', fill='red')
-c.create_text(150, 30, text='# of Prey', fill='blue')
-predator_text = c.create_text(50, 50, fill='red' )
-prey_text = c.create_text(150, 50, fill='blue' )
 
 for i in range(num_prey):
     create_animal('prey')
@@ -172,4 +204,4 @@ while True:
     sleep(0.01)
     step += 1
     collision()
-    
+   
