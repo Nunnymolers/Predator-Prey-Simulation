@@ -20,20 +20,12 @@ from math import sqrt
 #CONSTANTS
 HEIGHT = 400
 WIDTH = 800
-r = 8
+r = 7
 MIN_DISTANCE = 5
 MAX_DISTANCE = 60
 #CONTROL VARIABLES
 #starting ratio of predator and prey
 start_ratio = 0.5
-#the probabilities of killing and reproduction on collision
-kill_chance = 85
-repro_chance_prey = 70
-repro_chance_predator = 45
-#time
-starvation_predator = 5000
-predator_lifespan = 6200
-prey_lifespan = 5600
 #number of prey and predator
 num_predator = 5
 num_prey = int(num_predator/start_ratio - 1)
@@ -48,12 +40,12 @@ color = {
 }
 
 spawn = {
-   'prey': 7,
-   'predator': 6
+   'prey': 6,
+   'predator': 4
 }
 
 lifespan = {
-   'prey': 900,
+   'prey':900,
    'predator': 900
 }
 
@@ -80,7 +72,7 @@ animal_motion = {
    }, 
    'predator': {
       'change': {
-         'max': 23,
+         'max': 25,
          'min': 2
       }
    }
@@ -176,7 +168,7 @@ def collision():
              continue
           try:
                 if distance(animal_i['oval'], animal_j['oval']) < 2*r:
-                   if animal_i['type']== 'predator' and animal_j['type']== 'prey':
+                   if animal_i['type']== 'predator' and animal_j['type']== 'prey' and randint(1,100) <= 75:
                       del_animal(animal_j)
                    elif animal_i['type']== 'prey' and animal_j['type']== 'prey' and randint(1,100) <= spawn['prey']:
                       create_animal('prey')
