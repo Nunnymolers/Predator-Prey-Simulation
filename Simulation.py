@@ -54,8 +54,8 @@ chance_of_death = {
 }
 
 radius = {
-   'prey': 5,
-   'predator': 8
+   'prey': 3,
+   'predator': 3
 }
 
 #DEPENDENT VARIABLE
@@ -155,6 +155,15 @@ def handle_death(animal):
    if lifespan[animal['type']] < animal['age_count'] and randint(1,1000) <= chance_of_death[animal['type']]:
       del_animal(animal)
 
+def increase_size(animal):
+   r = animal['radius']
+   s = 2 #float(r +1)/float(r)
+   try:
+      c.scale(animal['oval'], 0, 0, s, s)
+      print("GOOD")
+   except Exception as ex:
+      print(ex)
+
 def get_coords(id_num):
     pos = c.coords(id_num)
     x =  (pos[0] + pos[2])/2
@@ -175,7 +184,7 @@ def collision():
                 if distance(animal_i['oval'], animal_j['oval']) < (animal_i['radius'] + animal_j['radius']):
                    if animal_i['type']== 'predator' and animal_j['type']== 'prey' and randint(1,100) <= 80:
                       del_animal(animal_j)
-                     # animal_i['radius'] += 1
+                      increase_size(animal_i)
                    elif animal_i['type']== 'prey' and animal_j['type']== 'prey' and randint(1,100) <= spawn['prey']:
                       create_animal('prey')
                    if animal_i['type']== 'predator' and animal_j['type']== 'predator' and randint(1,100) <= spawn['predator']:
