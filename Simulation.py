@@ -18,8 +18,8 @@ from math import sqrt
 
 
 #CONSTANTS
-HEIGHT = 400
-WIDTH = 800
+HEIGHT = 1080
+WIDTH = 1800
 MIN_DISTANCE = 5
 MAX_DISTANCE = 60
 #CONTROL VARIABLES
@@ -28,6 +28,8 @@ start_ratio = 0.5
 #number of prey and predator
 num_predator = 15
 num_prey = int(num_predator/start_ratio - 10)
+hunger_pain = 500
+radius_fluctuation = 2
 speed = {
    'prey': 3,
    'predator': 3
@@ -39,13 +41,13 @@ color = {
 }
 
 spawn = {
-   'prey': 12,
-   'predator': 2
+   'prey': 9,
+   'predator': 3
 }
 
 lifespan = {
-   'prey': 30,
-   'predator': 270
+   'prey': 350000,
+   'predator': 10000000
 }
 
 chance_of_death = {
@@ -54,8 +56,8 @@ chance_of_death = {
 }
 
 radius = {
-   'prey': 3,
-   'predator': 3
+   'prey': 7,
+   'predator': 9
 }
 
 #DEPENDENT VARIABLE
@@ -115,7 +117,6 @@ def walk(animal_motion,step,animal_list):
          animal_type = animal['type']
          animal_count[animal_type] += 1
          animal['age_count'] += 1
-         animal['hunger'] += 1
          if step % animal['direction_count'] == 0:
             animal['x'] = randint(-speed[animal_type],speed[animal_type])
             animal['y'] = randint(-speed[animal_type],speed[animal_type])
@@ -123,6 +124,8 @@ def walk(animal_motion,step,animal_list):
          c.move(animal['oval'], animal['x'], animal['y'])
          handle_boundary(animal['oval'])
          handle_death(animal)
+         if animal_type == 'predator':
+            handle_hunger(animal)
       except:
             pass
    print(','.join([str(step)] + [str(v) for v in animal_count.values()]))
@@ -155,15 +158,27 @@ def handle_death(animal):
    if lifespan[animal['type']] < animal['age_count'] and randint(1,1000) <= chance_of_death[animal['type']]:
       del_animal(animal)
 
-def increase_size(animal):
+def handle_meal(animal):
    r = animal['radius']
-   s = 2 #float(r +1)/float(r)
-   try:
-      c.scale(animal['oval'], 0, 0, s, s)
-      print("GOOD")
-   except Exception as ex:
-      print(ex)
+   nr = r + radius_fluctuation
+   s = float(nr)/float(r)
+   c.scale(animal['oval'], 0, 0, s, s)
+   animal['radius'] = nr;
+   animal['hunger'] = 0;
 
+
+def handle_hunger(animal):
+   animal['hunger'] += 1
+   if animal['hunger'] % hunger_pain == 0:
+      r = animal['radius']
+      nr = r - radius_fluctuation
+      if nr <= 0:
+         del_animal(animal)
+      else:
+         s = float(nr)/float(r)
+         c.scale(animal['oval'], 0, 0, s, s)
+         animal['radius'] = nr
+      
 def get_coords(id_num):
     pos = c.coords(id_num)
     x =  (pos[0] + pos[2])/2
@@ -184,7 +199,7 @@ def collision():
                 if distance(animal_i['oval'], animal_j['oval']) < (animal_i['radius'] + animal_j['radius']):
                    if animal_i['type']== 'predator' and animal_j['type']== 'prey' and randint(1,100) <= 80:
                       del_animal(animal_j)
-                      increase_size(animal_i)
+                      handle_meal(animal_i)
                    elif animal_i['type']== 'prey' and animal_j['type']== 'prey' and randint(1,100) <= spawn['prey']:
                       create_animal('prey')
                    if animal_i['type']== 'predator' and animal_j['type']== 'predator' and randint(1,100) <= spawn['predator']:
