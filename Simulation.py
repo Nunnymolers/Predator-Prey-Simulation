@@ -18,20 +18,18 @@ from math import sqrt
 
 
 #CONSTANTS
-HEIGHT = 1080
-WIDTH = 1800
-MIN_DISTANCE = 5
-MAX_DISTANCE = 60
+HEIGHT = 400
+WIDTH = 800
 #CONTROL VARIABLES
 #starting ratio of predator and prey
 start_ratio = 0.5
 #number of prey and predator
-num_predator = 15
-num_prey = int(num_predator/start_ratio - 10)
-hunger_pain = 500
+num_predator = 4
+num_prey = int(num_predator/start_ratio + 3)
+hunger_pain = 400
 radius_fluctuation = 2
 speed = {
-   'prey': 3,
+   'prey': 5,
    'predator': 3
 }
 
@@ -41,13 +39,13 @@ color = {
 }
 
 spawn = {
-   'prey': 9,
-   'predator': 3
+   'prey': 80,
+   'predator': 1
 }
 
 lifespan = {
    'prey': 350000,
-   'predator': 10000000
+   'predator': 50000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 }
 
 chance_of_death = {
@@ -56,8 +54,8 @@ chance_of_death = {
 }
 
 radius = {
-   'prey': 7,
-   'predator': 9
+   'prey': 2,
+   'predator': 5
 }
 
 #DEPENDENT VARIABLE
@@ -73,7 +71,7 @@ animal_motion = {
    'prey': {
       'change': {
          'max': 20,
-         'min': 4
+         'min': 6
       }
    }, 
    'predator': {
@@ -197,7 +195,7 @@ def collision():
              continue
           try:
                 if distance(animal_i['oval'], animal_j['oval']) < (animal_i['radius'] + animal_j['radius']):
-                   if animal_i['type']== 'predator' and animal_j['type']== 'prey' and randint(1,100) <= 80:
+                   if animal_i['type']== 'predator' and animal_j['type']== 'prey' and randint(1,100) <= 90:
                       del_animal(animal_j)
                       handle_meal(animal_i)
                    elif animal_i['type']== 'prey' and animal_j['type']== 'prey' and randint(1,100) <= spawn['prey']:
